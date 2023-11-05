@@ -4,6 +4,8 @@
 
 chatglm3发布了，这次还发了base版本的模型，意味着我们可以基于这个base模型去自由地做SFT了。本项目实现了基于base模型的SFT。
 
+- 支持Lora微调和全参数微调
+
 
 ## base模型
 
@@ -61,6 +63,15 @@ python train.py
 
 就可以运行。train.py 当中有需要可调节的参数可以自行调整。
 
+#### Lora微调
+
+![Logo](figures/training.png)
+
+#### 全参数微调
+
+![Logo](figures/training2.png)
+
+因为数据量太少，可以看到全参数微调一开始loss就在波动，而且很容易过拟合。
 
 ## 微调效果
 
@@ -84,7 +95,20 @@ model = PeftModel.from_pretrained(model, peft_model_id)
 
     Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]
 
+如果是全参数微调不需要合并模型 ，但记得把chatglm里的代码文件copy到微调后的路径中
 
+```
+from transformers import AutoTokenizer, AutoModel
+from peft import LoraConfig, PeftModel, get_peft_model
+
+tokenizer = AutoTokenizer.from_pretrained("./chatglm3-6b-base", trust_remote_code=True)
+model = AutoModel.from_pretrained("./trained_model/checkpoint-14", trust_remote_code=True).half().cuda()
+
+# peft_model_id = './trained_model/checkpoint-35'
+# model = PeftModel.from_pretrained(model, peft_model_id)
+```
+
+开始对话
 
 ```python
 history = []
@@ -199,7 +223,6 @@ print(response)
 代码参考自llamatune项目
 
 https://github.com/havenhq/haven/tree/dev/llamatune
-
 
 
 
